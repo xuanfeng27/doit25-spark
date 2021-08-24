@@ -5,6 +5,8 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
 import java.sql.{Connection, DriverManager, PreparedStatement, ResultSet}
+import scala.collection.{AbstractIterator, Iterator}
+import scala.collection.Iterator.empty
 import scala.collection.mutable.ListBuffer
 
 object C02_SPARKCORE各类转换算子 {
@@ -76,8 +78,9 @@ object C02_SPARKCORE各类转换算子 {
         val conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/abc", "root", "123456")
         val stmt = conn.prepareStatement("select phone,age from battel_info where id = ?")
 
-        // 开始迭代数据
-        val resIter: Iterator[(String, String, String, String, String, String)] = iter.flatMap(tp => {
+        // 开始迭代数据, 这种写法将无法关闭数据库连接
+        /*val resIter: Iterator[(String, String, String, String, String, String)] = iter.flatMap(tp => {
+          println("使用连接........")
           val id = tp._1.toInt
           stmt.setInt(1, id)
           val rs: ResultSet = stmt.executeQuery() // 迭代器的思想无处不在
@@ -93,15 +96,59 @@ object C02_SPARKCORE各类转换算子 {
         })
 
         // 关闭外部资源的连接
-        //stmt.close()
-        //conn.close()
+        println("关闭连接........")
+        stmt.close()
+        conn.close()
 
         // 返回一个迭代器
         resIter
+        */
+
+        // 正确打开方式：返回一个自定义的迭代器
+        new AbstractIterator[(String, String, String, String, String, String)] {
+
+          // 内层迭代器
+          var cur: Iterator[(String, String, String, String, String, String)] = Iterator.empty
+
+          override def hasNext: Boolean = {
+            // 如果内层迭代器还有数据，则返回true
+            if (cur.hasNext) {
+              true
+            }
+            // 如果内层迭代器已经没有数据了，则看外层迭代器是否还有数据
+            else if (iter.hasNext) {
+              // 从外层迭代器获取一条记录，处理成多条记录的结果转成迭代器后赋给 内存迭代器
+              val tp = iter.next()
+              val id = tp._1.toInt
+              stmt.setInt(1, id)
+              val rs: ResultSet = stmt.executeQuery() // 迭代器的思想无处不在
+
+              val listBuffer = new ListBuffer[(String, String, String, String, String, String)]
+              while (rs.next()) {
+                val phone: String = rs.getString("phone")
+                val age: String = rs.getString("age")
+                listBuffer += ((tp._1, tp._2, tp._3, tp._4, phone, age))
+              }
+              rs.close()
+
+              cur = listBuffer.toIterator
+              // 返回新的内层迭代器的hasNext结果
+              cur.hasNext
+            }
+            // 如果外、内两层迭代器都已经没有数据，则准备返回false，此时可以关闭数据库连接了
+            else {
+              stmt.close()
+              conn.close()
+              false
+            }
+          }
+
+          override def next(): (String, String, String, String, String, String) = {
+            (if(cur.hasNext) cur else Iterator.empty).next()
+          }
+        }
+
       })
-
-
-
 
     res5.foreach(println)
 
