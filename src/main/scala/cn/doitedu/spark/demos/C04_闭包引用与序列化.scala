@@ -43,10 +43,13 @@ object C04_闭包与广播变量 {
     /**
      *
      */
-    val resRdd = rdd.map(tp=> {
-      new Phone(tp._1,tp._2)   // 这里并没有引用外部的对象，所以不存在f序列化检查失败的问题，所以可以运行起来
-    }).map(phone=>(phone.brand,phone.price))
-      .reduceByKey(_+_)   // 但是，如果在分布式的环境中运行，这里的shuffle一定会报序列化失败的异常
+    val resRdd = rdd.map(tp => {
+      new Phone(tp._1, tp._2) // 这里并没有引用外部的对象，所以不存在f序列化检查失败的问题，所以可以运行起来
+    })
+      //.map(phone => (phone.brand, phone.price))
+      //.reduceByKey(_ + _) // 这里有shuffle，但是shuffle写出的是 2元组，它能序列化，所以不会报错
+      .groupBy(p=>p.brand)  // 这里有shuffle，而且shuffle写出phone对象，它不能序列化，所以报错
+      .mapValues(_.size)
 
     resRdd.foreach(println)
 
@@ -56,4 +59,4 @@ object C04_闭包与广播变量 {
 }
 
 // 在spark中，只要你自定义的类型，需要在executor端使用，则都把它实现序列化接口
-class Phone(var brand:String,var price:Double) extends Serializable
+class Phone(var brand: String, var price: Double)
