@@ -4,6 +4,14 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Serializable;
 
+/**
+ * @author 涛哥
+ * @nick_name "deep as the sea"
+ * @contact qq:657270652 wx:doit_edu
+ * @site www.doitedu.cn
+ * @date 2021-08-27
+ * @desc 封装任务的计算逻辑的bean
+ */
 public class Task implements Serializable {
 
     private int num;

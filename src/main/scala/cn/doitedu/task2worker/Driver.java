@@ -3,6 +3,14 @@ package cn.doitedu.task2worker;
 import java.io.*;
 import java.net.Socket;
 
+/**
+ * @author 涛哥
+ * @nick_name "deep as the sea"
+ * @contact qq:657270652 wx:doit_edu
+ * @site www.doitedu.cn
+ * @date 2021-08-27
+ * @desc 负责构造task对象，并发送
+ */
 public class Driver {
 
     public static void main(String[] args) throws Exception {
