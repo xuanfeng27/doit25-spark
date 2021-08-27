@@ -41,8 +41,11 @@ object C04_闭包与广播变量 {
     */
 
     /**
-     *
+     *  自定义类型，如果没有实现序列化，则很容易在executor端执行时报序列化异常
+     *  虽然下面示例代码中，一种报序列化异常，一种不报
+     *  但是，为了避免出现问题，建议一律将自定义类型实现序列化接口
      */
+    class Phone(var brand: String, var price: Double)
     val resRdd = rdd.map(tp => {
       new Phone(tp._1, tp._2) // 这里并没有引用外部的对象，所以不存在f序列化检查失败的问题，所以可以运行起来
     })
@@ -57,6 +60,3 @@ object C04_闭包与广播变量 {
 
   }
 }
-
-// 在spark中，只要你自定义的类型，需要在executor端使用，则都把它实现序列化接口
-class Phone(var brand: String, var price: Double)
