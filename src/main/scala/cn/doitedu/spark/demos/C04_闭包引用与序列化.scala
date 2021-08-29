@@ -58,5 +58,9 @@ object C04_闭包与广播变量 {
 
     sc.stop()
 
+    val r = sc.makeRDD(List("a", "a", "b", "c", "a", "d", "c"), 2)
+    r.map((_,1)).reduceByKey(_+_).map(tp=>(tp._1,tp._2*10)).foreach(println)
+
+
   }
 }
