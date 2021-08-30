@@ -12,7 +12,10 @@ object C08_父子RDD之间的依赖关系 {
 
     val rdd1: RDD[Int] = sc.makeRDD(1 to 10000, 4)
 
-    val res = rdd1.map(x=>(x,10)).reduceByKey( _ + _,2 ).map(tp=>(tp._1,tp._2 *30))
+    val res = rdd1
+      .map(x=>(x,10))
+      .reduceByKey( _ + _,2 )
+      .map(tp=>(tp._1,tp._2 *30))
 
     res.count()
 
