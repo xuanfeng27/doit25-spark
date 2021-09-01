@@ -1,16 +1,26 @@
+
+import org.apache.commons.lang3.RandomStringUtils
+
+import java.io.{BufferedWriter, FileWriter}
+
 object Test {
   def main(args: Array[String]): Unit = {
 
-    val iter1: Iterator[Int] = List[Int](1,2,3).iterator
-    val iter2: Iterator[Int] = List[Int]().iterator
-
-    for(e1 <- iter1 ){
-      println(e1)
+    val bw = new BufferedWriter(new FileWriter("d:/wc.txt"))
+    for(i <-1 to 100000000){
+      bw.write(RandomStringUtils.randomAlphabetic(3,6)
+        +" "+ RandomStringUtils.randomAlphabetic(3,6)
+        +" "+ RandomStringUtils.randomAlphabetic(3,6)
+        +" "+ RandomStringUtils.randomAlphabetic(3,6)
+        +" "+ RandomStringUtils.randomAlphabetic(3,6)
+        +" "+ RandomStringUtils.randomAlphabetic(3,6)
+        +" "+ RandomStringUtils.randomAlphabetic(3,6)
+        +" "+ RandomStringUtils.randomAlphabetic(3,6)
+        +" "+ RandomStringUtils.randomAlphabetic(3,6)
+      )
+      bw.newLine()
     }
-
-
-
+    bw.close()
 
   }
-
 }
