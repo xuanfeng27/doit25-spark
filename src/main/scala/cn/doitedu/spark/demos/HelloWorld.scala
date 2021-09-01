@@ -11,10 +11,20 @@ object HelloWorld {
     conf.set("spark.default.parallelism", "5")
     val sc = new SparkContext(conf)
 
-    val rdd0  = sc.makeRDD((1 to 10000).zip(10000 to 20000), 10000)
-    val rdd1  = rdd0.reduceByKey(_+_,5)   // HashPartitioner(400)
+    val rdd0 = sc.makeRDD((1 to 1000000).zip(1000000 to 2000000), 10)
+    val rdd1 = rdd0.map(tp => (tp._1 + "aaaaaaaaaaaaaaaaaaaaaaaaaa", tp._2))
 
-    rdd1.count
+    rdd1.cache()
+
+    val res = rdd1.reduceByKey(_ + _, 5) // HashPartitioner(400)
+
+    res.count
+
+    rdd1.map(tp=>(tp._1+"bbbbbbbbbb",tp._2)).count()
+
+    Thread.sleep(Long.MaxValue)
+
+    sc.stop()
 
   }
 }

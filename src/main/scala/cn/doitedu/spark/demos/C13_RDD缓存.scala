@@ -24,6 +24,7 @@ object C13_RDD缓存 {
     val rdd1 = rdd_o.map(tp => ((tp._1.account, tp._1.orderType), tp._1.amt))
     val rdd2 = rdd1.reduceByKey(_ + _)  // 中间结果   如果后续流程中需要对它反复使用，则可以把它物化
 
+
     // spark中对rdd物化的手段，就是将它缓存起来
     rdd2.cache()  //  persist(StorageLevel.MEMORY_ONLY)
     rdd2.persist(StorageLevel.MEMORY_AND_DISK)  // 可以自己控制存储级别
@@ -42,7 +43,6 @@ object C13_RDD缓存 {
         case "OFF_HEAP" => OFF_HEAP
     */
 
-
     // 在上面的结果res中，求TOP3
     val rdd3 = rdd2.map(tp => (-tp._2, tp._1))
     val res1 = rdd3.takeOrdered(3).map(tp => (tp._2, tp._1))
@@ -52,6 +52,15 @@ object C13_RDD缓存 {
     val rdd5 = rdd4.reduceByKey(_ + _)
     val res2 = rdd5.collect()
 
+    // 清除缓存； blocking=true，表示阻塞该方法直到所有分区缓存清理完毕
+    rdd2.unpersist(false)
+
+
+
+
+
+
+    Thread.sleep(Long.MaxValue)
     sc.stop()
   }
 }
