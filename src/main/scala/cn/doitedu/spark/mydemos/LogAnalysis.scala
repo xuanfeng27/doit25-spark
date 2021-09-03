@@ -1,6 +1,7 @@
 package cn.doitedu.spark.mydemos
 
-import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.{JSON, JSONObject}
+import org.apache.commons.lang.StringUtils
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 //步骤1：  完成行为  search，且行为属性中有 ： keyword = 咖啡
@@ -10,40 +11,52 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 object LogAnalysis {
   def main(args: Array[String]): Unit = {
-    val conf = new SparkConf().setMaster("local").setAppName("log")
+    val conf: SparkConf = new SparkConf().setAppName("loudou").setMaster("local")
     val sc = new SparkContext(conf)
-    //val rdd = sc.textFile("D:\\zll\\doitedu\\doitNotes\\doit25-spark\\doit25-spark-day03\\applog\\applog\\")
-    val rdd = sc.textFile("data/testlog.log")
-    val rdd1: RDD[(String, String, String,String)] = rdd.map(json=>{
-      val jSONObject = JSON.parseObject(json)
-      val deviceId = jSONObject.getString("deviceId")
-      val eventId = jSONObject.getString("eventId")
-      val timeStamp = jSONObject.getString("timeStamp")
-      val properties = jSONObject.getString("properties")
-      val prop = JSON.parseObject(properties)
-      val keyword = prop.getString("keywords")
-      val productId = prop.getString("productId")
-      val props =keyword+productId
-      (deviceId,eventId,props,timeStamp)
-    })
-    val rdd2: RDD[(String, Iterable[(String, String, String, String)])] = rdd1.groupBy(_._1)
-    val rdd3: RDD[(String, (String, String))] = rdd2.mapValues(iter => {
-      val list = iter.toList.sortBy(_._4)
-      val eventStr = list.map(_._2).mkString
-      val propStr = list.map(_._3).mkString
-      (eventStr,propStr)
+    val rdd: RDD[String] = sc.textFile("data/app_log_2021-06-07.log")
+    val rdd1: RDD[(String, String, Long)] = rdd.map(str => {
+      val jb = JSON.parseObject(str)
+      val deviceId: String = jb.getString("deviceId")
+      val eventId: String = jb.getString("eventId")
+      val timeStamp: Long = jb.getLong("timeStamp")
+      val props: JSONObject = jb.getJSONObject("properties")
+      eventId match {
+        case "search" if (props.getString("keywords").contains("YLoo")) => (deviceId, eventId, timeStamp)
+        case "addCart" if (props.getString("productId").startsWith("9")) => (deviceId, eventId, timeStamp)
+        case "submitOrder" => (deviceId, eventId, timeStamp)
+        case _ => ("", "", -1L)
+      }
+    }).filter(tp=>StringUtils.isNotBlank(tp._1))
+
+    val rdd2: RDD[(String, String)] = rdd1.groupBy(_._1).mapValues(tp => {
+      tp.toList
+        .sortBy(_._3)
+        .map(_._2)
+        .mkString(",")
     })
 
-    val rdd4: RDD[(String, String)] = rdd3.mapValues(tp => {
-      tp match {
-        case (a, b) if a.matches(".*search.*addCart.*submitOrder.*") && b.matches(".*咖啡101.*") => "123"
-        case (a, b) if a.matches(".*search.*addCart.*") && b.matches(".*咖啡101.*") => "12"
-        case (a, b) if a.matches(".*search.*") && b.matches(".*咖啡.*") => "1"
-        case _ => ""
+    val rdd3: RDD[(String, Int)] = rdd2.map(tp => {
+      tp._2 match {
+        case str: String if str.matches(".*?search.*?addCart.*?submitOrder.*?") => (tp._1, 3)
+        case str: String if str.matches(".*?search.*?addCart.*?") => (tp._1, 2)
+        case str: String if str.matches(".*?search.*?") => (tp._1, 1)
+        case _ => ("", 0)
+      }
+    }).filter(_._2 > 0)
+
+    //处理
+    val rdd4: RDD[(String, String)] = rdd3.flatMap(tp => {
+      for (i <- 1 to tp._2) yield {
+        (tp._1, "步骤"+i)
       }
     })
 
-    val rdd5: RDD[(String, Int)] = rdd4.filter(!_._2.equals("")).groupBy(_._2).mapValues(_.size)
-    rdd5.foreach(println)
+    val res: RDD[(String, Int)] = rdd4.groupBy(_._2).mapValues(_.size)
+
+    res.foreach(println)
+
+
+
+    sc.stop()
   }
 }
