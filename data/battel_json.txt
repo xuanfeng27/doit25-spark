@@ -1,0 +1,6 @@
+{"id":1,"name":"张飞","role":"坦克","energy":500}
+{"id":2,"name":"关羽","role":"战士","energy":600}
+{"id":3,"name":"赵云","role":"刺客","energy":600}
+{"id":4,"name":"马超","role":"战士","energy":400}
+{"id":5,"name":"张苞","role":"坦克","energy":300}
+{"id":6,"name":"黄忠","role":"刺客","energy":400}
