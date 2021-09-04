@@ -33,6 +33,13 @@
             <!--  provided 表示我们的项目将来运行时，环境中会提供spark依赖-->
         </dependency>
 
+        <!-- spark 整合 hive 的依赖 -->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-hive_2.12</artifactId>
+            <version>2.4.8</version>
+        </dependency>
+
 
         <dependency>
             <groupId>mysql</groupId>
@@ -158,8 +165,6 @@
         </plugins>
 
     </build>
-
-
 
 
 </project>
