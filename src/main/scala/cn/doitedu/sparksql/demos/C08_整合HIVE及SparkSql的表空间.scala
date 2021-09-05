@@ -27,7 +27,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
  *
  *
  */
-object C08_SPARKSQL的表空间 {
+object C08_整合HIVE及SparkSql的表空间 {
   def main(args: Array[String]): Unit = {
     Logger.getLogger("org.apache").setLevel(Level.WARN)
 
