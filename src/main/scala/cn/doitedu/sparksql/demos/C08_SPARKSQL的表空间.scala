@@ -13,7 +13,7 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
  * @date 2021-09-04
  * @desc
  *
- * sparksql中有多种表空间
+ * sparksql中有多种表空间（名称空间）
  *    1.  tempView  临时视图表空间
  *    2.  globalTempView 全局临时视图空间  （在多个sparksession之间共享临时视图）
  *    3.  hive元数据空间
@@ -50,10 +50,10 @@ object C08_SPARKSQL的表空间 {
     rddDF.createTempView("temp_stu")
 
     // globaltempview是个奇奇怪怪的小知识
-    rddDF.createGlobalTempView("global_temp_stu")
+    rddDF.createGlobalTempView("g_stu")
     val spark2: SparkSession = spark.newSession()
-    spark2.sql("select * from stu")  // spark2 看不见 临时视图  temp_stu
-    spark2.sql("select * from global_temp.global_temp_stu")  // spark2 可以看见globa临时视图 global_temp_stu
+    spark2.sql("select * from temp_stu")  // spark2 看不见 临时视图  temp_stu
+    spark2.sql("select * from global_temp.g_stu")  // spark2 可以看见globa临时视图 global_temp_stu
 
 
     /**
