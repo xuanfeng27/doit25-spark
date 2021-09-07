@@ -5,3 +5,4 @@ id,name,role,energy
 4,machao,战士,400
 5,zhangbao,坦克,300
 6,huangzhong,刺客,400
+7,huangzhong,坦克,500
