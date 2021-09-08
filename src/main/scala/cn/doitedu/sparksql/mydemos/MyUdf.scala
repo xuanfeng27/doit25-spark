@@ -8,7 +8,7 @@ import scala.collection.mutable
 object MyUdf{
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession.builder()
-      .appName("oshi")
+      .appName("欧式距离")
       .master("local[*]")
       .getOrCreate()
 
