@@ -45,13 +45,12 @@ public class C05_消费者偏移量手动提交2 {
                     System.out.println(record.partition() + " -> " + record.offset() + " -> " + record.value());
 
                     // 如果在处理成功后，手动更新偏移量，则能实现  at least once 的数据处理语义
-                    // 提交方式：同步调用
                     Map<TopicPartition, OffsetAndMetadata> offsets = Collections.singletonMap(new TopicPartition(record.topic(), record.partition()), new OffsetAndMetadata(record.offset() + 1));
                     consumer.commitSync(offsets);
 
                 }
 
-                // 也可以在这里记录新的消费偏移量
+                // 也可以在这里记录新的消费偏移量（相当于一批数据处理完成后记录一次偏移量
 
             }
         }
