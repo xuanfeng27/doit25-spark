@@ -33,7 +33,7 @@ public class C01_KAFKA生产者示例 {
             // 用生产者发送消息(kafka的producer底层数据发送都是使用的异步发送）
             producer.send(record);
 
-            Thread.sleep(200,2000);
+            Thread.sleep(200);
 
         }
         producer.close();
