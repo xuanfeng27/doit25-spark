@@ -29,9 +29,17 @@ public class C05_消费者偏移量手动提交 {
         props.setProperty(ConsumerConfig.CLIENT_ID_CONFIG,"c01");
         // 消费者所属的组id
         props.setProperty(ConsumerConfig.GROUP_ID_CONFIG,"g3");
-
-
+        // 分区分配策略： 区间策略
+        props.setProperty(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,RoundRobinAssignor.class.getName());
         KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(props);
+
+
+
+
+        Properties props2 = new Properties();
+        props2.setProperty(ConsumerConfig.PARTITION_ASSIGNMENT_STRATEGY_CONFIG,RangeAssignor.class.getName());
+        props2.setProperty(ConsumerConfig.GROUP_ID_CONFIG,"g3");
+        KafkaConsumer<String, String> consumer2 = new KafkaConsumer<String, String>(props2);
 
         // 由消费者固定住要消费的topic及分区
         TopicPartition tpc3_p0 = new TopicPartition("tpc3", 0);
@@ -44,6 +52,7 @@ public class C05_消费者偏移量手动提交 {
             if(!records.isEmpty()){
                 for (ConsumerRecord<String, String> record : records) {
                     // 如果在处理成功前，手动更新偏移量，则能实现  at most once 的数据处理语义
+
 
                     // 数据处理逻辑
                     System.out.println(record.partition() + " -> " + record.offset() + " -> " + record.value());

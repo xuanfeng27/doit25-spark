@@ -19,6 +19,15 @@ public class C01_KAFKA生产者示例 {
         props.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         props.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
+        // acks参数的可选值有： 0 ， 1，  -1（all）
+        // 0: 不等待服务端的确认
+        // 1: 等确认，而且服务端只要leader存好这条消息，就确认； -- 可靠性高于0，但也不能确保数据一定不丢
+        // 2:
+        props.setProperty(ProducerConfig.ACKS_CONFIG,"1");
+        props.setProperty(ProducerConfig.MAX_REQUEST_SIZE_CONFIG,"1");
+        props.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG,"snappy");
+        props.setProperty(ProducerConfig.RETRIES_CONFIG,"3");
+
 
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
 
