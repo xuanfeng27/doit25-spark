@@ -1,6 +1,7 @@
 package cn.doitedu.sparksql.mydemos
 
-import org.apache.spark.sql.{Dataset, Encoder, Encoders, Row, SparkSession}
+import org.apache.log4j.{Level, Logger}
+import org.apache.spark.sql.{Dataset, Encoder, Encoders, Row, SparkSession, TypedColumn, functions}
 import org.apache.spark.sql.expressions.{Aggregator, MutableAggregationBuffer, UserDefinedAggregateFunction}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{DataType, DataTypes, StructField, StructType}
@@ -9,6 +10,7 @@ import scala.collection.mutable.ArrayBuffer
 case class Soldier(id:Int,name:String,role:String,energy:Double)
 object MyUdaf {
   def main(args: Array[String]): Unit = {
+    Logger.getLogger("org").setLevel(Level.WARN)
     val spark = SparkSession.builder().appName("udaf").master("local").getOrCreate()
     val schema = StructType(Seq(
       StructField("id",DataTypes.IntegerType),
@@ -30,7 +32,7 @@ object MyUdaf {
 
 
     //注册弱类型自定义
-    spark.udf.register("myavg",myavg)
+    spark.udf.register("myavg",Myavg)
     spark.sql(
       """
         |select
@@ -42,19 +44,31 @@ object MyUdaf {
         |""".stripMargin)
 
 
-
-    //
-    val ds: Dataset[Soldier] = df.as[Soldier] //
-    val sAvgCol = strongAvg.toColumn.name("hhh")
-    ds.select(sAvgCol).show()
-    //ds.groupBy("role").agg(sAvgCol("energy")).show()
+  println("-------------------------------------------------")
+    /*  //spark 3.0 版本
+    val strongAvg = new StrongAvg
+    spark.udf.register("strongAvg", functions.udaf(strongAvg))
+    spark.sql(
+      """
+        |select
+        |role,
+        |strongAvg(energy)
+        |from
+        |df
+        |group by role
+        |""".stripMargin).show()*/
+    //注册强类型自定义
+    val ds: Dataset[Soldier] = df.as[Soldier]
+    val strongAvg = new StrongAvg
+    val sAvgCol: TypedColumn[Double, Double] = strongAvg.toColumn
+    ds.groupBy("role").agg(sAvgCol("energy")).show()
 
 
     spark.close()
   }
 }
 //弱类型UDAF接口实现
-object myavg extends UserDefinedAggregateFunction {
+object Myavg extends UserDefinedAggregateFunction {
   def inputSchema: StructType = StructType(Seq(
     StructField("energy",DataTypes.DoubleType)
   ))
@@ -87,7 +101,7 @@ object myavg extends UserDefinedAggregateFunction {
 }
 // * 强类型UDAF接口实现
 case class AarrayBuf(sum:Double,count:Int)
-object strongAvg extends Aggregator[Double,AarrayBuf,Double]{
+class StrongAvg extends Aggregator[Double,AarrayBuf,Double]{
   def zero: AarrayBuf = AarrayBuf(0.0,0)
 
   def reduce(b: AarrayBuf, a: Double): AarrayBuf = {

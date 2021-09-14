@@ -1,5 +1,7 @@
 package cn.doitedu.mykafka;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -25,8 +27,8 @@ public class Demo01_kafka_producer {
         for(int i=0;i<=100;i++){
             ProducerRecord<String, String> record = new ProducerRecord<>(
                     "mytopic02",
-                    "key"+i,
-                    "value"+i
+                    StringUtils.leftPad(i+"",8,"0"),
+                    RandomStringUtils.randomAlphabetic(2).toUpperCase()
             );
             producer.send(record);
         }

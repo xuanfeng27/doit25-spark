@@ -30,18 +30,17 @@ public class Demo01_kafka_consumer2 {
         props.setProperty(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put("auto.offset.reset","latest");
         props.put(ConsumerConfig.GROUP_ID_CONFIG,"test2");
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(props);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
         consumer.subscribe(Arrays.asList("mytopic02"));
 
         while (true){
             ConsumerRecords<String, String> poll = consumer.poll(Duration.ofMillis(500));
             for (ConsumerRecord<String, String> record : poll) {
                 System.out.println(
-                        record.key() + "--" +
-                                record.value()+"--"+
-                                record.partition()  + "--" +
-                                record.offset()
-
+                    record.topic() + "--" +
+                    record.partition()  + "--" +
+                    record.value()+"--"+
+                    record.offset()
                 );
             }
         }
