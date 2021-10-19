@@ -1,7 +1,7 @@
 <configuration>
     <property>
         <name>hbase.rootdir</name>
-        <value>hdfs://doit01:8020/hbase</value>
+        <value>hdfs://doit:8020/hbase</value>
     </property>
 
     <property>
@@ -11,7 +11,7 @@
 
     <property>
         <name>hbase.zookeeper.quorum</name>
-        <value>doit01:2181,doit02:2181,doit03:2181</value>
+        <value>doit:2181,doit02:2181,doit03:2181</value>
     </property>
 
     <property>
